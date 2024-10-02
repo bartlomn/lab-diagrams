@@ -1,0 +1,54 @@
+@startuml lab-network
+nwdiag {
+  inet [shape = cloud];
+  inet -- modem;
+
+  network dmz {
+    color = "red"
+    address = "192.168.14.1/24"
+
+    modem [ address = "192.168.14.1"]
+    OPNSense [ address = "192.168.14.4" ]
+  }
+  
+  network lan {
+    color = "palegreen"
+    address = "10.14.1.1/16"
+
+    OPNSense [ address = "10.14.1.1" ]
+    pipko [ address = "10.14.1.2" ]
+    amplifi [ address = "10.14.1.100" ]
+  }
+
+  network wlan {
+    color = "palegreen"
+    address = "192.168.146.1/24"
+
+    amplifi [ address = "192.168.146.1" ]
+    clientA
+    clientB
+  }
+
+  network iot {
+    color = "red"
+    address = "192.168.251.1/24"
+
+    amplifi [ address = "192.168.251.1" ]
+    clientC
+    clientD
+  }
+
+  group {
+    description = "Home";
+    modem
+    OPNSense
+    pipko
+    amplifi
+    clientA
+    clientB
+    clientC
+    clientD
+  }
+
+}
+@enduml
