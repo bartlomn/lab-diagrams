@@ -5,18 +5,20 @@ nwdiag {
 
   network dmz {
     color = "red"
-    address = "192.168.14.1/24"
+    address = "192.168.14.0/24"
 
     modem [ address = "192.168.14.1"]
-    OPNSense [ address = "192.168.14.4" ]
+    OPNSense [ address = "192.168.14.2" ]
   }
   
   network lan {
     color = "palegreen"
-    address = "10.14.1.1/16"
+    address = "10.14.0.0/16"
 
     OPNSense [ address = "10.14.1.1" ]
-    pipko [ address = "10.14.1.2" ]
+    cicik [ address = "10.14.1.10" ]
+    gulik [ address = "10.14.1.11" ]
+    pipko [ address = "10.14.1.12" ]
     amplifi [ address = "10.14.1.100" ]
   }
 
@@ -42,6 +44,8 @@ nwdiag {
     description = "Home";
     modem
     OPNSense
+    cicik
+    gulik
     pipko
     amplifi
     clientA

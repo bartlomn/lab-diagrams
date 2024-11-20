@@ -1,0 +1,125 @@
+@startuml 'homelab wiring diagram'
+
+cloud {
+    [Inet]
+}
+
+node "EG8145V5" {
+    portin EG8145V5_WAN as "WAN"
+    portout EG8145V5_port1 as "rj45 1"
+    portout EG8145V5_port2 as "rj45 2"
+    portout EG8145V5_port3 as "rj45 3"
+    portout EG8145V5_port4 as "rj45 4"
+}
+
+node "cicik" {
+    portin cicik_rj45_1 as "rj45 1"
+    portout cicik_rj45_2 as "rj45 2"
+    [cicik_rj45_usb_1] as "usb 1"
+    portin cicik_rj45_usb_2 as "usb 2"
+
+    frame "OPNSense backup 1" {
+        portin cicik_OPNSense_WAN as "WAN"
+        cicik_OPNSense_WAN -- [cicik_rj45_1]
+        portout cicik_OPNSense_LAN as "LAN"
+        cicik_OPNSense_LAN -- [cicik_rj45_2]
+        interface cicik_OPNSense_pfsync as "PFSync"
+        cicik_OPNSense_pfsync -- [cicik_rj45_usb_1]
+    }
+}
+
+node "gulik" {
+    portin gulik_rj45_1 as "rj45 1"
+    portout gulik_rj45_2 as "rj45 2"
+    portin gulik_rj45_3 as "rj45 3"
+    [gulik_rj45_4] as "rj45 4"
+
+    frame "OPNSense master" {
+        portin gulik_OPNSense_WAN as "WAN" 
+        gulik_OPNSense_WAN -- [gulik_rj45_1]
+        portout gulik_OPNSense_LAN as "LAN"
+        gulik_OPNSense_LAN -- [gulik_rj45_2]
+        interface gulik_OPNSense_pfsync as "PFSync"
+        gulik_OPNSense_pfsync -- [gulik_rj45_4]
+    }
+}
+
+
+node "pipko" {
+    portin pipko_rj45_usb_2 as "usb 2"
+    portin pipko_rj45_1 as "rj45 1"
+    portout pipko_rj45_2 as "rj45 2"
+    [pipko_rj45_usb_1] as "usb 1"
+
+    frame "OPNSense backup 2" {
+        portin pipko_OPNSense_WAN as "WAN"
+        pipko_OPNSense_WAN -- [pipko_rj45_1]
+        portout pipko_OPNSense_LAN as "lan"
+        pipko_OPNSense_LAN -- [pipko_rj45_2]
+        interface pipko_OPNSense_pfsync as "PFSync"
+        pipko_OPNSense_pfsync -- [pipko_rj45_usb_1]
+    }
+}
+
+' pfsync dedicated switch
+node "switch generic 1gbps" {
+    portin generic_rj45_1 as "rj45 1"
+    portin generic_rj45_2 as "rj45 2"
+    portin generic_rj45_3 as "rj45 3"
+    portin generic_rj45_4 as "rj45 4"
+    portin generic_rj45_5 as "rj45 5"
+}
+
+' lan dedicated switch
+node "switch unifi" {
+    portin unifi_rj45_1 as "rj45 1"
+    portin unifi_rj45_2 as "rj45 2"
+    portin unifi_rj45_3 as "rj45 3"
+    portout unifi_rj45_4 as "rj45 4"
+    portout unifi_rj45_5 as "rj45 5"
+    portout unifi_rj45_6 as "rj45 6"
+    portout unifi_rj45_7 as "rj45 7"
+    portout unifi_rj45_8 as "rj45 8"
+}
+
+' WiFi APs
+node "UniFi AP1" {
+    portin unifi_ap1_in as "rj45"
+}
+node "UniFi AP2" {
+    portin unifi_ap2_in as "rj45"
+}
+
+' fiber connection to artcom router
+[Inet] -- [EG8145V5_WAN]
+
+' WAN connections to nodes
+[EG8145V5_port1] ---- [gulik_rj45_1]
+[EG8145V5_port2] ---- [cicik_rj45_1]
+[EG8145V5_port3] ---- [pipko_rj45_1]
+
+' PFSync network
+[cicik_rj45_usb_1] ---- [generic_rj45_1]
+[gulik_rj45_4] ---- [generic_rj45_2]
+[pipko_rj45_usb_1] ---- [generic_rj45_3]
+
+' lan network
+[cicik_rj45_2] ---- [unifi_rj45_1]
+[gulik_rj45_2] ---- [unifi_rj45_2]
+[pipko_rj45_2] ---- [unifi_rj45_3]
+[cicik_rj45_usb_2] ---- [unifi_rj45_4]
+[gulik_rj45_3] ---- [unifi_rj45_5]
+[pipko_rj45_usb_2] ---- [unifi_rj45_6]
+
+' wifi connections
+[unifi_rj45_7] ---- [unifi_ap1_in]
+[unifi_rj45_8] ---- [unifi_ap2_in]
+
+' notes
+note right of "switch generic 1gbps"
+  Can this be implemennted on 
+  a single switch with VLANs?
+end note
+
+
+@enduml
